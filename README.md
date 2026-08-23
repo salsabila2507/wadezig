@@ -74,6 +74,40 @@ pip install -r requirements.txt
 
 ---
 
+## Getting proxy IPs (ProxyScrape)
+
+The script needs a list of proxy IPs in `proxies_ips.txt`. The easiest free
+source is **ProxyScrape** (`https://proxyscrape.com` → free proxy list).
+
+**Option A — let the script fetch them for you (recommended):**
+```bash
+python tokenharbor_signup.py fetch
+```
+This hits ProxyScrape's API and writes `~443` fresh `ip:port` HTTP proxies into
+`proxies_ips.txt`. Re-run any time you need a new batch.
+
+**Option B — copy manually from the website:**
+1. Open https://proxyscrape.com (or the free list page).
+2. Choose proxy type `http`, format `plaintext`, and copy the list.
+3. Paste into `proxies_ips.txt`, **one `ip:port` per line**
+   (e.g. `102.66.161.31:8888`).
+
+**Accepted line formats** (the script parses all of these automatically):
+```
+1.2.3.4                 # host only -> uses TH_PROXY_PORT + TH_PROXY_AUTH
+1.2.3.4:8080           # host:port
+user:pass@1.2.3.4:8080 # auth + host:port
+```
+
+> **Quality warning:** ProxyScrape's *free* proxies are public/shared — many are
+> dead, slow, or already Cloudflare-flagged, so expect a low signup success
+> rate. For reliable bulk account creation use **authenticated / residential**
+> proxies (set `TH_PROXY_AUTH` + the right `TH_PROXY_PORT`, one `ip:port` per
+> line). The Cloudflare caveat in the "Read this first" section still applies
+> regardless of source.
+
+---
+
 ## Usage
 
 ```bash

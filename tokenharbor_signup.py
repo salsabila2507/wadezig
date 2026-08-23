@@ -181,18 +181,54 @@ def load_proxies():
         return []
     return [l.strip() for l in open(PROXY_IPS_FILE) if l.strip()]
 
+def fetch_proxies():
+    """Pull fresh HTTP proxies from ProxyScrape into PROXY_IPS_FILE.
+    Usage:  python tokenharbor_signup.py fetch
+    """
+    url = ("https://api.proxyscrape.com/?request=getproxies&proxytype=http"
+           "&timeout=10000&country=all&ssl=all&anonymity=all")
+    print(f"  fetching proxies from proxyscrape...")
+    try:
+        r = creq.get(url, timeout=40)
+    except Exception as e:
+        print(f"  FETCH GAGAL: {e}"); return
+    lines = [l.strip().replace("\r", "") for l in r.text.splitlines() if l.strip()]
+    lines = [l for l in lines if re.match(r"^\d+\.\d+\.\d+\.\d+:\d+$", l)]
+    os.makedirs(os.path.dirname(PROXY_IPS_FILE) or ".", exist_ok=True)
+    with open(PROXY_IPS_FILE, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"  OK: {len(lines)} proxy tersimpan di {PROXY_IPS_FILE}")
+
+def parse_proxy(line):
+    """line forms accepted:
+        ip                -> use TH_PROXY_PORT + TH_PROXY_AUTH
+        ip:port           -> that port, TH_PROXY_AUTH
+        user:pass@ip:port -> that auth + port
+    """
+    line = line.strip()
+    auth = PROXY_AUTH
+    if "@" in line:
+        a, line = line.split("@", 1)
+        auth = a or auth
+    if ":" in line:
+        host, _, port = line.rpartition(":")
+        port = port or PROXY_PORT
+    else:
+        host, port = line, PROXY_PORT
+    return host, port, auth
+
 def set_proxy(idx):
     global PROXIES
     ips = load_proxies()
     if not ips:
         PROXIES = None; return None
-    ip = ips[idx % len(ips)]
-    if PROXY_AUTH:
-        url = f"http://{PROXY_AUTH}@{ip}:{PROXY_PORT}"
+    host, port, auth = parse_proxy(ips[idx % len(ips)])
+    if auth:
+        url = f"http://{auth}@{host}:{port}"
     else:
-        url = f"http://{ip}:{PROXY_PORT}"
+        url = f"http://{host}:{port}"
     PROXIES = {"http": url, "https": url}
-    return ip
+    return f"{host}:{port}"
 
 def have_key(k):
     try:
@@ -207,6 +243,9 @@ def count_keys():
         return 0
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "fetch":
+        fetch_proxies()
+        return
     count = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 1
     os.makedirs(os.path.dirname(KEYS_FILE), exist_ok=True)
     proxies = load_proxies()

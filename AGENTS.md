@@ -26,13 +26,28 @@ cd <repo>
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
 ```
-Put proxy IPs (one per line) in `proxies_ips.txt`, then:
+Put your proxy IPs (one per line) in `proxies_ips.txt`, then:
 ```bash
-export TH_PROXY_AUTH="user:pass"      # proxy credential
-export TH_PROXY_PORT="3129"           # or your proxy port
+export TH_PROXY_AUTH="user:pass"      # proxy credential (leave empty for open proxies)
+export TH_PROXY_PORT="3129"           # or your proxy port (only used when a line is host-only)
 # optional single-proxy override (phone tunnel):
 # export TH_PROXY="socks5h://127.0.0.1:1081"
 ```
+The working method that produced real keys: a list of datacenter proxy IPs
+(one per line) + `TH_PROXY_AUTH`/`TH_PROXY_PORT`, rotated 1 IP per account with
+retry/grind. **Each IP yields at most 1 account** (then Cloudflare flags it).
+
+Accepted `proxies_ips.txt` line formats (all parsed automatically):
+```
+ip                 # host only -> uses TH_PROXY_PORT + TH_PROXY_AUTH
+ip:port           # host:port
+user:pass@ip:port # auth + host:port
+```
+
+Optional convenience (often yields DEAD public proxies — low success):
+`python tokenharbor_signup.py fetch` pulls free `ip:port` HTTP proxies from
+ProxyScrape (`https://proxyscrape.com`) into `proxies_ips.txt`. Prefer your own
+authenticated/residential list for reliable bulk creation.
 
 ## Run
 ```bash
