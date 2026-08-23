@@ -1,0 +1,8 @@
+# never commit secrets / generated output
+proxies_ips.txt
+tokenharbor_apikeys.txt
+tokenharbor_accounts.json
+.env
+.venv/
+__pycache__/
+*.pyc

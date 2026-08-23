@@ -1,0 +1,10 @@
+# Put one proxy IP per line (no auth, no port — those come from env vars).
+# Example:
+# 1.2.3.4
+# 5.6.7.8
+# 9.10.11.12
+#
+# Then export:
+#   export TH_PROXY_AUTH="youruser:yourpass"
+#   export TH_PROXY_PORT="3129"
+# See README.md for details.
