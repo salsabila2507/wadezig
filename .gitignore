@@ -6,3 +6,7 @@ tokenharbor_accounts.json
 .venv/
 __pycache__/
 *.pyc
+apikeys.txt
+accounts.json
+proxies_fresh.txt
+proxies.txt
